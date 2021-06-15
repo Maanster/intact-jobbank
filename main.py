@@ -35,10 +35,6 @@ def login():
         question_input.send_keys('joel')
     if security_question == "Where did you first meet your significant other?":
         question_input.send_keys('Chandigarh')
-    if security_question == "":
-        question_input.send_keys('Chander')
-    if security_question == "":
-        question_input.send_keys('Chander')
 
     login_continue = driver.find_element_by_xpath('//*[@id="continueButton"]')
     login_continue.click()
@@ -54,6 +50,8 @@ def access_jobs():
     driver.implicitly_wait(2)
     for i in range(3):
         find_jobs()
+        driver.get('https://employer.jobbank.gc.ca/employer/jobpostings/0')
+        time.sleep(25)
         driver.find_element_by_xpath('//*[@id="joblist_next"]').click()
         time.sleep(10)
 
@@ -70,6 +68,8 @@ def find_jobs():
         try:
             company = driver.find_element_by_xpath(xpath_company_name).get_attribute("innerHTML")
             company_link = driver.find_element_by_xpath(xpath_access_company)
+            if company_link.get_attribute("class") != "num-matches hit":
+                continue
             if company in list_of_companies:
                 company_link.click()
                 sort_list()
@@ -105,13 +105,14 @@ def invite():
         count = count + 1
         xpath_if_invited = '//*[@id="matchlistpanel"]/tbody/tr[' + str(count) + ']/td[9]/span/span[@class="wb-inv "]'
         xpath_if_intact = '//*[@id="matchlistpanel"]/tbody/tr[' + str(count) + ']/td[2]/span'
-        star_rating = '//*[@id="matchlistpanel"]/tbody/tr[' + str(count) + ']/td[3]/span/span[1]'
+        xpath_stars = '//*[@id="matchlistpanel"]/tbody/tr[' + str(count) + ']/td[3]/span/span[3]'
         invited = driver.find_element_by_xpath(xpath_if_invited)
         intact = driver.find_element_by_xpath(xpath_if_intact)
-        if star_rating.__getattribute__('class') == "star-matches-one-half" or "star-matches-one":
-            break
+        stars = driver.find_element_by_xpath(xpath_stars)
         if invited.get_attribute("innerHTML") == "Invited to apply":
             continue
+        if float(stars.get_attribute("innerHTML")) >= 0.37:
+            break
         if intact.get_attribute('class') == 'jb-canada-icon':
             if count != 1:
                 time.sleep(length)
